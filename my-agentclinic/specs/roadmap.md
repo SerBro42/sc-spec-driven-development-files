@@ -1,33 +1,84 @@
 # Roadmap
 
-The implementation should proceed in small, testable phases that keep scope focused and make it easy to improve the product over time.
+Deliver AgentClinic in exactly 10 Nano phases. Each phase contains 1–3 focused feature slices, is independently testable, and should take no more than one day. Treat the checks below as acceptance criteria, not extra feature slices; split a phase if its scope grows beyond a day.
 
-## Phase 1: Foundation
+## Nano Phase 1: Hello Hono
 
-- Scaffold the app and project structure.
-- Establish the server-side TypeScript runtime and framework.
-- Configure the basic build pipeline and ensure a clean local development experience.
+**Feature slices**
+- Scaffold the TypeScript and Node.js project with Hono.
+- Add a `GET /` route that returns a simple “Hello, AgentClinic!” response.
 
-## Phase 2: Core domain model
+**Acceptance:** The app starts locally and the route returns the expected response.
 
-- Define the agent and ailment concepts.
-- Model therapy options and appointment scheduling flows.
-- Add SQLite-backed persistence for the clinic data.
+## Nano Phase 2: SQLite foundation
 
-## Phase 3: Dashboard and booking UX
+**Feature slices**
+- Configure local SQLite access.
+- Initialize the database from an application schema setup.
 
-- Create a dashboard for agents and staff.
-- Add interfaces for viewing profiles, symptoms, and recommended therapies.
-- Support appointment booking and status tracking.
+**Acceptance:** The app opens the configured database and initializes its schema successfully.
 
-## Phase 4: Product polish
+## Nano Phase 3: Susan — Agents
 
-- Improve styling and responsiveness for modern browsers.
-- Make the experience visually attractive and easy to present in demos.
-- Validate the workflow for both educational and conference-booth use cases.
+**Feature slices**
+- Define the agent data model and SQLite table.
+- Add routes to create and list agents.
 
-## Phase 5: Iteration and expansion
+**Acceptance:** Agent records can be created and retrieved from SQLite.
 
-- Refine the experience based on stakeholder feedback.
-- Expand features as needed without losing clarity in the core clinic workflow.
-- Continue using spec-driven development to guide future changes.
+## Nano Phase 4: Susan — Ailments
+
+**Feature slices**
+- Define ailments and their relationship to agents.
+- Add routes to create and list an agent’s ailments.
+
+**Acceptance:** Ailments persist and are returned only for their associated agent.
+
+## Nano Phase 5: Susan — Therapies
+
+**Feature slices**
+- Define therapy options and associate them with ailments.
+- Add routes to create and retrieve therapies for an ailment.
+
+**Acceptance:** An ailment returns only its associated therapy options.
+
+## Nano Phase 6: Susan — Booking records
+
+**Feature slices**
+- Define the booking data model, including its agent, therapy, time, and status.
+- Persist bookings in SQLite with the required relationships.
+
+**Acceptance:** A booking can be saved and retrieved with its associated agent and therapy.
+
+## Nano Phase 7: Susan — Booking workflow
+
+**Feature slices**
+- Add a route to create a booking with input validation.
+- Add routes to list bookings and update their supported status.
+
+**Acceptance:** Valid bookings and status changes persist; invalid submissions receive clear errors.
+
+## Nano Phase 8: Mary — Dashboard
+
+**Feature slices**
+- Add a dashboard page that lists agents and links to their details.
+- Show an agent’s ailments, related therapies, and bookings.
+
+**Acceptance:** The dashboard presents the persisted clinic data and handles empty lists and unknown agent IDs.
+
+## Nano Phase 9: Steve — Polish
+
+**Feature slices**
+- Apply consistent visual styling to dashboard and booking pages.
+- Make the main clinic workflow responsive for narrow and wide screens.
+
+**Acceptance:** The core workflow remains readable and usable at both viewport sizes.
+
+## Nano Phase 10: Hardening
+
+**Feature slices**
+- Add focused tests for the main routes and booking workflow.
+- Handle expected database and request errors with clear responses.
+- Verify the complete clinic workflow from local startup through booking status update.
+
+**Acceptance:** Tests pass and the end-to-end workflow completes without unhandled errors.
