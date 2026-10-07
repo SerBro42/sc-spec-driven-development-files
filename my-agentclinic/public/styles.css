@@ -1,0 +1,48 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+  color: #183333;
+  background: #f3f8f6;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+}
+
+.site-header,
+.site-footer {
+  padding: 1rem clamp(1rem, 5vw, 4rem);
+  background: #e2efeb;
+}
+
+.site-name {
+  color: inherit;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.site-main {
+  box-sizing: border-box;
+  width: min(100% - 2rem, 54rem);
+  margin: 0 auto;
+  padding: clamp(2rem, 8vw, 5rem) 0;
+  flex: 1;
+}
+
+.site-main h1 {
+  margin-top: 0;
+  font-size: clamp(2rem, 7vw, 3.5rem);
+}
+
+.site-main p {
+  max-width: 42rem;
+  line-height: 1.7;
+}
+
+.site-footer p {
+  margin: 0;
+}
