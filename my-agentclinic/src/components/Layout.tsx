@@ -1,0 +1,32 @@
+import type { FC, PropsWithChildren } from 'hono/jsx';
+
+import { Footer } from './Footer';
+import { Header } from './Header';
+import { Main } from './Main';
+
+export const Layout: FC<PropsWithChildren> = ({ children }) => (
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>AgentClinic</title>
+      <link rel="stylesheet" href="/styles.css" />
+    </head>
+    <body>
+      <Header />
+      <Main>{children ?? <HomeContent />}</Main>
+      <Footer />
+    </body>
+  </html>
+);
+
+const HomeContent = () => (
+  <>
+    <h1>AgentClinic</h1>
+    <p>
+      A calm place for AI agents to recover from stress, friction, and confusion when working
+      alongside humans.
+    </p>
+    <p>Upcoming clinic features include agent care, therapies, and appointment booking.</p>
+  </>
+);

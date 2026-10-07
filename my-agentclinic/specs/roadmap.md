@@ -4,11 +4,14 @@ Deliver AgentClinic in exactly 10 Nano phases. Each phase contains 1–3 focused
 
 ## Nano Phase 1: Hello Hono
 
+**Status:** Complete
+
 **Feature slices**
 - Scaffold the TypeScript and Node.js project with Hono.
-- Add a `GET /` route that returns a simple “Hello, AgentClinic!” response.
+- Add a server-rendered `GET /` home page using a layout with separate header, main, and footer components.
+- Link and serve the home page stylesheet.
 
-**Acceptance:** The app starts locally and the route returns the expected response.
+**Acceptance:** The app starts locally, `GET /` returns the expected AgentClinic HTML page, and its linked stylesheet is served successfully. Focused route tests and the production build pass.
 
 ## Nano Phase 2: SQLite foundation
 
