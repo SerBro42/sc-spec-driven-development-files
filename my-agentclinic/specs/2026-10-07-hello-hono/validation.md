@@ -2,7 +2,7 @@
 
 ## Automated checks
 
-- The focused route test passes.
+- The Vitest route test passes via the project validation script (`npm test` / `npm run validate`).
 - The route test confirms `GET /` responds with HTTP 200 and an HTML content type.
 - The rendered page includes an AgentClinic title, a mission-aligned introduction, and a placeholder note for upcoming clinic features.
 - `tsconfig.json` explicitly sets `"strict": true`.
