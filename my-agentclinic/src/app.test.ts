@@ -11,6 +11,7 @@ describe('AgentClinic app routes', () => {
 
     const html = await response.text();
     expect(html).toContain('<html lang="en">');
+    expect(html).toContain('<meta name="viewport" content="width=device-width, initial-scale=1"/>');
     expect(html).toContain('<header class="site-header">');
     expect(html).toContain('<main class="site-main">');
     expect(html).toContain('<footer class="site-footer">');
@@ -30,6 +31,7 @@ describe('AgentClinic app routes', () => {
     expect(css).toContain('.site-header');
     expect(css).toContain('.site-main');
     expect(css).toContain('.site-footer');
+    expect(css).toContain('@media (min-width: 700px)');
   });
 
   it('returns a 404 for unknown routes', async () => {

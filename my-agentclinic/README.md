@@ -12,3 +12,4 @@
 - Run the test suite with `npm test`.
 - Use `npm run validate` when you want the project’s standard validation command for automated checks.
 - Build the production bundle with `npm run build`.
+- Keep the UI responsive and readable across mobile and desktop viewports while adding new pages and components.

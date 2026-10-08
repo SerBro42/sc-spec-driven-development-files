@@ -13,13 +13,14 @@ Hono is the recommended server framework for AgentClinic. It is lightweight, Typ
 - Hono for routing, middleware, and server-rendered HTML using Hono JSX.
 - SQLite for local, reliable persistence of agents, ailments, therapies, and appointments.
 - Vitest for automated validation and fast test execution during development.
-- Plain CSS for a polished, responsive browser experience.
+- Plain CSS with responsive, mobile-friendly layouts for a polished browser experience.
 - A simple app structure that supports fast iteration while staying easy to explain in demos and course materials.
 
 ## Validation approach
 
 - Use Vitest as the standard test runner for validation across application logic and route behavior.
 - Keep validation lightweight and fast so the team can run automated checks regularly during development.
+- Verify the UI remains readable and usable across typical mobile and desktop viewport sizes.
 - Use the package script to execute the suite in a consistent, repeatable way.
 
 ## Why this stack

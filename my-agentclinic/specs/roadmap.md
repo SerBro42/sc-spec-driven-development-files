@@ -9,9 +9,9 @@ Deliver AgentClinic in exactly 10 Nano phases. Each phase contains 1–3 focused
 **Feature slices**
 - Scaffold the TypeScript and Node.js project with Hono.
 - Add a server-rendered `GET /` home page using a layout with separate header, main, and footer components.
-- Link and serve the home page stylesheet.
+- Link and serve the home page stylesheet with a responsive, mobile-friendly layout.
 
-**Acceptance:** The app starts locally, `GET /` returns the expected AgentClinic HTML page, and its linked stylesheet is served successfully. The Vitest route tests pass via the project validation script, and the production build passes.
+**Acceptance:** The app starts locally, `GET /` returns the expected AgentClinic HTML page, and its linked stylesheet is served successfully. The layout remains readable and usable on narrow and wide screens, the Vitest route tests pass via the project validation script, and the production build passes.
 
 ## Nano Phase 2: SQLite foundation
 
@@ -73,9 +73,9 @@ Deliver AgentClinic in exactly 10 Nano phases. Each phase contains 1–3 focused
 
 **Feature slices**
 - Apply consistent visual styling to dashboard and booking pages.
-- Make the main clinic workflow responsive for narrow and wide screens.
+- Make the main clinic workflow responsive for narrow and wide screens, with layout adjustments that keep forms, content, and actions usable on phones and desktops.
 
-**Acceptance:** The core workflow remains readable and usable at both viewport sizes.
+**Acceptance:** The core workflow remains readable and usable at both small and large viewport sizes, and the layout adapts without breaking the user experience.
 
 ## Nano Phase 10: Hardening
 
