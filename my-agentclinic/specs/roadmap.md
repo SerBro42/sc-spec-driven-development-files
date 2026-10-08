@@ -1,6 +1,6 @@
 # Roadmap
 
-Deliver AgentClinic in exactly 10 Nano phases. Each phase contains 1–3 focused feature slices, is independently testable, and should take no more than one day. Treat the checks below as acceptance criteria, not extra feature slices; split a phase if its scope grows beyond a day.
+Deliver AgentClinic in a sequence of Nano phases. Each phase contains 1–3 focused feature slices, is independently testable, and should take no more than one day. Treat the checks below as acceptance criteria, not extra feature slices; split a phase if its scope grows beyond a day.
 
 ## Nano Phase 1: Hello Hono
 
@@ -13,39 +13,23 @@ Deliver AgentClinic in exactly 10 Nano phases. Each phase contains 1–3 focused
 
 **Acceptance:** The app starts locally, `GET /` returns the expected AgentClinic HTML page, and its linked stylesheet is served successfully. The layout remains readable and usable on narrow and wide screens, the Vitest route tests pass via the project validation script, and the production build passes.
 
-## Nano Phase 2: SQLite foundation
+## Nano Phase 2: SQLite foundation, Susan data model, and JSX/CSS layout
 
 **Feature slices**
 - Configure local SQLite access.
 - Initialize the database from an application schema setup.
-
-**Acceptance:** The app opens the configured database and initializes its schema successfully.
-
-## Nano Phase 3: Susan — Agents
-
-**Feature slices**
 - Define the agent data model and SQLite table.
 - Add routes to create and list agents.
-
-**Acceptance:** Agent records can be created and retrieved from SQLite.
-
-## Nano Phase 4: Susan — Ailments
-
-**Feature slices**
 - Define ailments and their relationship to agents.
 - Add routes to create and list an agent’s ailments.
-
-**Acceptance:** Ailments persist and are returned only for their associated agent.
-
-## Nano Phase 5: Susan — Therapies
-
-**Feature slices**
 - Define therapy options and associate them with ailments.
 - Add routes to create and retrieve therapies for an ailment.
+- Build a reusable JSX layout for the clinic pages with clear header, main, and footer sections.
+- Add consistent CSS styling for the dashboard and clinic pages, including responsive spacing and layout behavior.
 
-**Acceptance:** An ailment returns only its associated therapy options.
+**Acceptance:** The app opens the configured database and initializes its schema successfully; agent, ailment, and therapy records can be created and retrieved from SQLite with the correct relationships and filtering; the page layout renders cleanly via JSX and the CSS keeps the clinic interface readable and usable across mobile and desktop widths.
 
-## Nano Phase 6: Susan — Booking records
+## Nano Phase 3: Susan — Booking records
 
 **Feature slices**
 - Define the booking data model, including its agent, therapy, time, and status.
@@ -53,7 +37,7 @@ Deliver AgentClinic in exactly 10 Nano phases. Each phase contains 1–3 focused
 
 **Acceptance:** A booking can be saved and retrieved with its associated agent and therapy.
 
-## Nano Phase 7: Susan — Booking workflow
+## Nano Phase 4: Susan — Booking workflow
 
 **Feature slices**
 - Add a route to create a booking with input validation.
@@ -61,7 +45,7 @@ Deliver AgentClinic in exactly 10 Nano phases. Each phase contains 1–3 focused
 
 **Acceptance:** Valid bookings and status changes persist; invalid submissions receive clear errors.
 
-## Nano Phase 8: Mary — Dashboard
+## Nano Phase 5: Mary — Dashboard
 
 **Feature slices**
 - Add a dashboard page that lists agents and links to their details.
@@ -69,7 +53,7 @@ Deliver AgentClinic in exactly 10 Nano phases. Each phase contains 1–3 focused
 
 **Acceptance:** The dashboard presents the persisted clinic data and handles empty lists and unknown agent IDs.
 
-## Nano Phase 9: Steve — Polish
+## Nano Phase 6: Steve — Polish
 
 **Feature slices**
 - Apply consistent visual styling to dashboard and booking pages.
@@ -77,7 +61,7 @@ Deliver AgentClinic in exactly 10 Nano phases. Each phase contains 1–3 focused
 
 **Acceptance:** The core workflow remains readable and usable at both small and large viewport sizes, and the layout adapts without breaking the user experience.
 
-## Nano Phase 10: Hardening
+## Nano Phase 7: Hardening
 
 **Feature slices**
 - Add focused tests for the main routes and booking workflow.
