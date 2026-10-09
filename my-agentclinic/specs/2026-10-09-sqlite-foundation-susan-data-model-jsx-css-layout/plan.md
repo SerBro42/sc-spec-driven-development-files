@@ -1,7 +1,7 @@
 # SQLite Foundation, Susan Data Model, and JSX/CSS Layout — Plan
 
 1. **Set up SQLite persistence**
-   - Select and configure a Node.js-compatible SQLite library that fits the existing TypeScript project.
+   - Configure Node.js's built-in `node:sqlite` module for the existing TypeScript project (Node.js 22.5 or newer).
    - Open a local SQLite database and initialize its schema idempotently from the application.
    - Enable foreign-key enforcement and define tables for agents, ailments, therapies, and their many-to-many relationships.
    - Keep runtime database files out of version control.

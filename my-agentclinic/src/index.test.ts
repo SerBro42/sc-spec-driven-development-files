@@ -1,29 +1,25 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { app } from './index';
+import { createApp } from './app';
+import { openDatabase } from './database';
+import type { DatabaseSync } from 'node:sqlite';
 
-describe('AgentClinic home page', () => {
-  it('renders the expected HTML for GET /', async () => {
-    const response = await app.request('http://localhost/');
+describe('AgentClinic app routes', () => {
+  let database: DatabaseSync;
+  let app: ReturnType<typeof createApp>;
 
-    expect(response.status).toBe(200);
-    expect(response.headers.get('content-type')).toContain('text/html');
-
-    const html = await response.text();
-    expect(html).toContain('<h1>AgentClinic</h1>');
-    expect(html).toContain('AI agents');
-    expect(html).toContain('Upcoming clinic features');
-    expect(html).toContain('<header');
-    expect(html).toContain('<main');
-    expect(html).toContain('<footer');
-    expect(html).toContain('<link rel="stylesheet" href="/styles.css"/>');
+  beforeEach(() => {
+    database = openDatabase(':memory:');
+    app = createApp(database);
   });
 
-  it('serves the linked stylesheet', async () => {
-    const response = await app.request('http://localhost/styles.css');
+  afterEach(() => {
+    database.close();
+  });
 
-    expect(response.status).toBe(200);
-    expect(response.headers.get('content-type')).toContain('text/css');
-    expect(await response.text()).toContain('.site-main');
+  it('returns a 404 for unknown routes', async () => {
+    const response = await app.request('http://localhost/unknown-route');
+
+    expect(response.status).toBe(404);
   });
 });

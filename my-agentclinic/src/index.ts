@@ -1,8 +1,10 @@
 import { serve } from '@hono/node-server';
 
-import { app } from './app';
+import { createApp } from './app';
+import { openDatabase } from './database';
 
-export { app };
+export const database = openDatabase();
+export const app = createApp(database);
 
 const port = Number(process.env.PORT ?? 3000);
 

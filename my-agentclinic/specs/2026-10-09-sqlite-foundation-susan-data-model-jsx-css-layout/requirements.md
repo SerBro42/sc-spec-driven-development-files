@@ -29,7 +29,7 @@ Complete Nano Phase 2 of the AgentClinic roadmap by adding local SQLite persiste
 
 ## Decisions
 
-- **Database:** Use SQLite with a Node.js-compatible library. Persist data locally; keep runtime database files out of version control.
+- **Database:** Use Node.js's built-in `node:sqlite` module (Node.js 22.5 or newer). Persist data locally; keep runtime database files out of version control.
 - **Schema setup:** Initialize the application's schema safely on startup so a fresh database is ready and a restart does not destroy existing data.
 - **Relationships:** Use join tables for agents and ailments, and for ailments and therapies. Enforce references with SQLite foreign keys and avoid duplicate links.
 - **Baseline fields:** Agents have a name; ailments and therapies each have a name and description. Generate stable identifiers for records. Names are required; descriptions may be empty.

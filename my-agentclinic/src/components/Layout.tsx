@@ -4,12 +4,15 @@ import { Footer } from './Footer';
 import { Header } from './Header';
 import { Main } from './Main';
 
-export const Layout: FC<PropsWithChildren> = ({ children }) => (
+type LayoutProps = PropsWithChildren;
+
+export const Layout: FC<LayoutProps> = ({ children }) => (
   <html lang="en">
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>AgentClinic</title>
+      <link rel="stylesheet" href="/pico.min.css" />
       <link rel="stylesheet" href="/styles.css" />
     </head>
     <body>
@@ -28,5 +31,11 @@ const HomeContent = () => (
       alongside humans.
     </p>
     <p>Upcoming clinic features include agent care, therapies, and appointment booking.</p>
+    <p>Explore agent care, related ailments, and available therapies.</p>
+    <p>
+      <a href="/agents" role="button">
+        Visit the clinic
+      </a>
+    </p>
   </>
 );

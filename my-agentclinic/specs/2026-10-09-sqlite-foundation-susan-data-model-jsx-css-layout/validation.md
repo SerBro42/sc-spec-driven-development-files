@@ -5,6 +5,7 @@
 - The project validation script (`npm run validate` or `npm test`) passes.
 - The production TypeScript build completes successfully.
 - Database initialization creates the required tables on a fresh local database and is safe to repeat without losing persisted records.
+- File-backed records remain available after the database is closed and reopened.
 - Data tests verify agent, ailment, and therapy creation and retrieval.
 - Relationship tests verify that:
   - an agent's ailment list contains only ailments linked to that agent;
