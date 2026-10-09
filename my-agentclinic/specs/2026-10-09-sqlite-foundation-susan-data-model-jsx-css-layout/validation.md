@@ -14,6 +14,7 @@
   - unknown foreign keys are rejected and duplicate relationship links are not created.
 - Route tests verify the relevant HTML pages, create/list form submissions, and rendered related records.
 - Route tests verify clear error responses for invalid required fields and unknown record IDs.
+- Route tests verify names over 120 characters and descriptions over 1,000 characters are rejected, and relevant form values remain populated after validation errors.
 - The clinic layout loads PicoCSS and uses its baseline styling for semantic page elements and form controls; custom CSS remains limited to project-specific needs.
 
 ## Manual acceptance checks

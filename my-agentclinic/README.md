@@ -8,6 +8,7 @@
 
 ## Development and validation
 
+- Requires Node.js 22.5 or newer for the built-in `node:sqlite` module.
 - Run the app locally with `npm run dev`.
 - Run the test suite with `npm test`.
 - Use `npm run validate` when you want the project’s standard validation command for automated checks.

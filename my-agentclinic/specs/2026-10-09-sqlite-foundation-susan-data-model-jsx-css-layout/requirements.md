@@ -11,6 +11,7 @@ Complete Nano Phase 2 of the AgentClinic roadmap by adding local SQLite persiste
 - Persist agents with a generated identifier and a name.
 - Persist ailments with a generated identifier, name, and description.
 - Persist therapies with a generated identifier, name, and description.
+- Limit names to 120 characters and descriptions to 1,000 characters, enforcing these limits in request validation and the database schema.
 - Model agent-to-ailment and ailment-to-therapy relationships as many-to-many relationships.
 - Provide server-rendered HTML pages and forms using Hono JSX to create and list agents, create and list an agent's ailments, and create and retrieve therapies for an ailment.
 - Support associating an existing ailment with another agent and an existing therapy with another ailment, in addition to creating new related records.
@@ -34,7 +35,7 @@ Complete Nano Phase 2 of the AgentClinic roadmap by adding local SQLite persiste
 - **Relationships:** Use join tables for agents and ailments, and for ailments and therapies. Enforce references with SQLite foreign keys and avoid duplicate links.
 - **Baseline fields:** Agents have a name; ailments and therapies each have a name and description. Generate stable identifiers for records. Names are required; descriptions may be empty.
 - **Routes and UX:** Use server-rendered HTML `GET` pages and form `POST` submissions, not JSON endpoints. Forms must allow both creating a related record and linking an existing one where applicable.
-- **Errors:** Preserve entered form values when practical and show a clear, user-readable error for invalid submissions or unknown referenced records; do not report failed writes as successful.
+- **Errors:** Preserve entered form values on the relevant page when validation fails, and show a clear, user-readable error for invalid submissions or unknown referenced records; do not report failed writes as successful.
 - **Presentation:** Reuse the shared Hono JSX layout and use PicoCSS for the clinic interface, supplemented by minimal project-specific CSS as needed. Maintain a clear header, main content, and footer with responsive behavior.
 - **Feature boundary:** Implement only Nano Phase 2 from the roadmap. The next booking phase remains out of scope.
 

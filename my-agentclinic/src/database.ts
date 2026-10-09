@@ -39,19 +39,25 @@ export function initializeDatabase(database: DatabaseSync): void {
   database.exec(`
     CREATE TABLE IF NOT EXISTS agents (
       id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL CHECK (length(trim(name)) > 0)
+      name TEXT NOT NULL CHECK (
+        length(trim(name)) > 0 AND length(name) <= 120
+      )
     );
 
     CREATE TABLE IF NOT EXISTS ailments (
       id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL CHECK (length(trim(name)) > 0),
-      description TEXT NOT NULL DEFAULT ''
+      name TEXT NOT NULL CHECK (
+        length(trim(name)) > 0 AND length(name) <= 120
+      ),
+      description TEXT NOT NULL DEFAULT '' CHECK (length(description) <= 1000)
     );
 
     CREATE TABLE IF NOT EXISTS therapies (
       id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL CHECK (length(trim(name)) > 0),
-      description TEXT NOT NULL DEFAULT ''
+      name TEXT NOT NULL CHECK (
+        length(trim(name)) > 0 AND length(name) <= 120
+      ),
+      description TEXT NOT NULL DEFAULT '' CHECK (length(description) <= 1000)
     );
 
     CREATE TABLE IF NOT EXISTS agent_ailments (

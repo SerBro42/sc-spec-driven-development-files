@@ -107,6 +107,18 @@ describe('AgentClinic Phase 2 routes', () => {
     expect(await invalidResponse.text()).toContain('Enter a name');
     expect(listAgents(database)).toHaveLength(0);
 
+    const longName = 'a'.repeat(121);
+    const longNameResponse = await app.request('http://localhost/agents', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ name: longName }),
+    });
+    expect(longNameResponse.status).toBe(400);
+    const longNameHtml = await longNameResponse.text();
+    expect(longNameHtml).toContain('120 characters or fewer');
+    expect(longNameHtml).toContain(`value="${longName}"`);
+    expect(listAgents(database)).toHaveLength(0);
+
     const createResponse = await app.request('http://localhost/agents', {
       method: 'POST',
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -214,6 +226,70 @@ describe('AgentClinic Phase 2 routes', () => {
     });
     expect(unknownAilmentLink.status).toBe(404);
     expect(await unknownAilmentLink.text()).toContain('This ailment does not exist');
+
+    const agentId = createAgent(database, 'Alex');
+    const ailmentId = createAilmentForAgent(database, agentId, 'Context switching fatigue', '');
+    const blankAilmentResponse = await app.request(
+      `http://localhost/agents/${agentId}/ailments`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          mode: 'create',
+          name: '   ',
+          description: 'Keep this description.',
+        }),
+      },
+    );
+    expect(blankAilmentResponse.status).toBe(400);
+    const blankAilmentHtml = await blankAilmentResponse.text();
+    expect(blankAilmentHtml).toContain('Enter a name for the ailment');
+    expect(blankAilmentHtml).toContain('Keep this description.');
+
+    const longDescriptionResponse = await app.request(
+      `http://localhost/agents/${agentId}/ailments`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          mode: 'create',
+          name: 'Kept ailment name',
+          description: 'd'.repeat(1001),
+        }),
+      },
+    );
+    expect(longDescriptionResponse.status).toBe(400);
+    const longDescriptionHtml = await longDescriptionResponse.text();
+    expect(longDescriptionHtml).toContain('1000 characters or fewer');
+    expect(longDescriptionHtml).toContain('value="Kept ailment name"');
+
+    const blankTherapyResponse = await app.request(
+      `http://localhost/ailments/${ailmentId}/therapies`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          mode: 'create',
+          name: '',
+          description: 'Keep this therapy description.',
+        }),
+      },
+    );
+    expect(blankTherapyResponse.status).toBe(400);
+    const blankTherapyHtml = await blankTherapyResponse.text();
+    expect(blankTherapyHtml).toContain('Enter a name for the therapy');
+    expect(blankTherapyHtml).toContain('Keep this therapy description.');
+
+    const unknownTherapyLink = await app.request(
+      `http://localhost/ailments/${ailmentId}/therapies`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ mode: 'link', therapyId: '999' }),
+      },
+    );
+    expect(unknownTherapyLink.status).toBe(404);
+    expect(await unknownTherapyLink.text()).toContain('This therapy does not exist');
 
     expect(() => linkAilmentToAgent(database, 999, 999)).toThrow();
   });

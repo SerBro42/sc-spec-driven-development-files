@@ -23,17 +23,28 @@ type FormData = Record<string, string | File | (string | File)[]>;
 
 type AgentListProps = {
   database: DatabaseSync;
+  error?: string;
+  name?: string;
 };
 
 type AgentDetailsProps = {
   database: DatabaseSync;
   agentId: number;
+  ailmentError?: string;
+  ailmentName?: string;
+  ailmentDescription?: string;
 };
 
 type AilmentDetailsProps = {
   database: DatabaseSync;
   ailmentId: number;
+  therapyError?: string;
+  therapyName?: string;
+  therapyDescription?: string;
 };
+
+const MAX_NAME_LENGTH = 120;
+const MAX_DESCRIPTION_LENGTH = 1000;
 
 function formValue(form: FormData, key: string): string {
   const value = form[key];
@@ -60,12 +71,13 @@ function messagePage(title: string, message: string) {
   );
 }
 
-const AgentList = ({ database }: AgentListProps) => {
+const AgentList = ({ database, error, name = '' }: AgentListProps) => {
   const agents = listAgents(database);
   return (
     <Layout>
       <h1>Agents</h1>
       <p>Choose an agent to review their ailments and explore care options.</p>
+      {error ? <p role="alert">{error}</p> : null}
       <section aria-labelledby="agent-list-heading">
         <h2 id="agent-list-heading">Clinic agents</h2>
         {agents.length ? (
@@ -84,7 +96,7 @@ const AgentList = ({ database }: AgentListProps) => {
         <h2>Add an agent</h2>
         <form method="post" action="/agents">
           <label for="agent-name">Name</label>
-          <input id="agent-name" name="name" required maxlength={120} />
+          <input id="agent-name" name="name" required maxlength={MAX_NAME_LENGTH} value={name} />
           <button type="submit">Create agent</button>
         </form>
       </article>
@@ -95,6 +107,9 @@ const AgentList = ({ database }: AgentListProps) => {
 const AgentDetails = ({
   database,
   agentId,
+  ailmentError,
+  ailmentName = '',
+  ailmentDescription = '',
 }: AgentDetailsProps) => {
   const agent = getAgent(database, agentId);
   if (!agent) {
@@ -109,6 +124,7 @@ const AgentDetails = ({
         <a href="/agents">← All agents</a>
       </p>
       <h1>{agent.name}</h1>
+      {ailmentError ? <p role="alert">{ailmentError}</p> : null}
       <section aria-labelledby="ailment-list-heading">
         <h2 id="ailment-list-heading">Ailments</h2>
         {ailments.length ? (
@@ -130,9 +146,22 @@ const AgentDetails = ({
           <form method="post" action={`/agents/${agentId}/ailments`}>
             <input type="hidden" name="mode" value="create" />
             <label for="ailment-name">Name</label>
-            <input id="ailment-name" name="name" required maxlength={120} />
+            <input
+              id="ailment-name"
+              name="name"
+              required
+              maxlength={MAX_NAME_LENGTH}
+              value={ailmentName}
+            />
             <label for="ailment-description">Description (optional)</label>
-            <textarea id="ailment-description" name="description" rows={3} maxlength={1000} />
+            <textarea
+              id="ailment-description"
+              name="description"
+              rows={3}
+              maxlength={MAX_DESCRIPTION_LENGTH}
+            >
+              {ailmentDescription}
+            </textarea>
             <button type="submit">Create and link ailment</button>
           </form>
         </article>
@@ -162,6 +191,9 @@ const AgentDetails = ({
 const AilmentDetails = ({
   database,
   ailmentId,
+  therapyError,
+  therapyName = '',
+  therapyDescription = '',
 }: AilmentDetailsProps) => {
   const ailment = getAilment(database, ailmentId);
   if (!ailment) {
@@ -177,6 +209,7 @@ const AilmentDetails = ({
       </p>
       <h1>{ailment.name}</h1>
       {ailment.description ? <p>{ailment.description}</p> : <p>No description provided.</p>}
+      {therapyError ? <p role="alert">{therapyError}</p> : null}
       <section aria-labelledby="therapy-list-heading">
         <h2 id="therapy-list-heading">Therapies</h2>
         {therapies.length ? (
@@ -198,9 +231,22 @@ const AilmentDetails = ({
           <form method="post" action={`/ailments/${ailmentId}/therapies`}>
             <input type="hidden" name="mode" value="create" />
             <label for="therapy-name">Name</label>
-            <input id="therapy-name" name="name" required maxlength={120} />
+            <input
+              id="therapy-name"
+              name="name"
+              required
+              maxlength={MAX_NAME_LENGTH}
+              value={therapyName}
+            />
             <label for="therapy-description">Description (optional)</label>
-            <textarea id="therapy-description" name="description" rows={3} maxlength={1000} />
+            <textarea
+              id="therapy-description"
+              name="description"
+              rows={3}
+              maxlength={MAX_DESCRIPTION_LENGTH}
+            >
+              {therapyDescription}
+            </textarea>
             <button type="submit">Create and link therapy</button>
           </form>
         </article>
@@ -239,7 +285,20 @@ export function createApp(database: DatabaseSync): Hono {
     const form = await c.req.parseBody();
     const name = formValue(form, 'name');
     if (!name) {
-      return c.html(messagePage('Agent name required', 'Enter a name before creating an agent.'), 400);
+      return c.html(
+        <AgentList database={database} error="Enter a name before creating an agent." name={name} />,
+        400,
+      );
+    }
+    if (name.length > MAX_NAME_LENGTH) {
+      return c.html(
+        <AgentList
+          database={database}
+          error={`Agent names must be ${MAX_NAME_LENGTH} characters or fewer.`}
+          name={name}
+        />,
+        400,
+      );
     }
     const agentId = createAgent(database, name);
     return c.redirect(`/agents/${agentId}`, 303);
@@ -264,14 +323,48 @@ export function createApp(database: DatabaseSync): Hono {
     const mode = formValue(form, 'mode');
     if (mode === 'create') {
       const name = formValue(form, 'name');
+      const description = formValue(form, 'description');
       if (!name) {
-        return c.html(messagePage('Ailment name required', 'Enter a name for the ailment.'), 400);
+        return c.html(
+          <AgentDetails
+            database={database}
+            agentId={agentId}
+            ailmentError="Enter a name for the ailment."
+            ailmentName={name}
+            ailmentDescription={description}
+          />,
+          400,
+        );
+      }
+      if (name.length > MAX_NAME_LENGTH) {
+        return c.html(
+          <AgentDetails
+            database={database}
+            agentId={agentId}
+            ailmentError={`Ailment names must be ${MAX_NAME_LENGTH} characters or fewer.`}
+            ailmentName={name}
+            ailmentDescription={description}
+          />,
+          400,
+        );
+      }
+      if (description.length > MAX_DESCRIPTION_LENGTH) {
+        return c.html(
+          <AgentDetails
+            database={database}
+            agentId={agentId}
+            ailmentError={`Ailment descriptions must be ${MAX_DESCRIPTION_LENGTH} characters or fewer.`}
+            ailmentName={name}
+            ailmentDescription={description}
+          />,
+          400,
+        );
       }
       const ailmentId = createAilmentForAgent(
         database,
         agentId,
         name,
-        formValue(form, 'description'),
+        description,
       );
       return c.redirect(`/ailments/${ailmentId}`, 303);
     }
@@ -308,14 +401,48 @@ export function createApp(database: DatabaseSync): Hono {
     const mode = formValue(form, 'mode');
     if (mode === 'create') {
       const name = formValue(form, 'name');
+      const description = formValue(form, 'description');
       if (!name) {
-        return c.html(messagePage('Therapy name required', 'Enter a name for the therapy.'), 400);
+        return c.html(
+          <AilmentDetails
+            database={database}
+            ailmentId={ailmentId}
+            therapyError="Enter a name for the therapy."
+            therapyName={name}
+            therapyDescription={description}
+          />,
+          400,
+        );
+      }
+      if (name.length > MAX_NAME_LENGTH) {
+        return c.html(
+          <AilmentDetails
+            database={database}
+            ailmentId={ailmentId}
+            therapyError={`Therapy names must be ${MAX_NAME_LENGTH} characters or fewer.`}
+            therapyName={name}
+            therapyDescription={description}
+          />,
+          400,
+        );
+      }
+      if (description.length > MAX_DESCRIPTION_LENGTH) {
+        return c.html(
+          <AilmentDetails
+            database={database}
+            ailmentId={ailmentId}
+            therapyError={`Therapy descriptions must be ${MAX_DESCRIPTION_LENGTH} characters or fewer.`}
+            therapyName={name}
+            therapyDescription={description}
+          />,
+          400,
+        );
       }
       createTherapyForAilment(
         database,
         ailmentId,
         name,
-        formValue(form, 'description'),
+        description,
       );
       return c.redirect(`/ailments/${ailmentId}`, 303);
     }
