@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-09
+- Added the Nano Phase 2 feature plan, requirements, and validation criteria.
+- Implemented local SQLite storage and many-to-many agent, ailment, and therapy relationships.
+- Added server-rendered clinic pages and forms, with PicoCSS styling and responsive layout.
+- Added route, persistence, and relationship tests; enforced form length limits and preserved values on validation errors.
+- Documented the Node.js 22.5+ requirement for the built-in SQLite module.
+
 ## 2026-10-08
 - Added a project-local changelog skill and initialized this date-based changelog from git history.
 - Updated the roadmap to combine phases 2-5 into a new Phase 2 and emphasize layout/CSS work.
