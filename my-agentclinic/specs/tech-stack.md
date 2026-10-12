@@ -11,7 +11,7 @@ Hono is the recommended server framework for AgentClinic. It is lightweight, Typ
 - TypeScript for application logic and type safety.
 - Node.js to run the server-side application.
 - Hono for routing, middleware, and server-rendered HTML using Hono JSX.
-- SQLite for local, reliable persistence of agents, ailments, therapies, and appointments.
+- SQLite for local, reliable persistence of agents, ailments, therapies, and appointments, with ordered schema migrations and idempotent starter records and relationships.
 - Vitest for automated validation and fast test execution during development.
 - Plain CSS with responsive, mobile-friendly layouts for a polished browser experience.
 - A simple app structure that supports fast iteration while staying easy to explain in demos and course materials.
@@ -29,4 +29,5 @@ Hono is the recommended server framework for AgentClinic. It is lightweight, Typ
 - Hono keeps server-side routing and rendering lightweight while providing a clear TypeScript-first developer experience.
 - Server-rendered HTML avoids the overhead of a separate client-side framework for the dashboard.
 - SQLite fits the product needs for a simple, reliable data store without unnecessary operational complexity.
+- Versioned migrations make schema evolution explicit, while idempotent starter data gives new local databases useful fictional clinic records and linked agent ailments without disturbing user data.
 - The stack remains approachable for students and conference demos while still being production-ready enough for a real product foundation.

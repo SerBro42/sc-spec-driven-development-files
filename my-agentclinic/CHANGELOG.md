@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-12
+- Updated Nano Phase 2 to require versioned SQLite migrations, a first agents-table migration, and idempotent fictional agent and ailment seed data with every seeded agent linked to at least one ailment.
+- Updated the feature plan, requirements, validation criteria, README, and tech-stack guidance to reflect the database setup.
+
 ## 2026-10-09
 - Added the Nano Phase 2 feature plan, requirements, and validation criteria.
 - Implemented local SQLite storage and many-to-many agent, ailment, and therapy relationships.

@@ -17,7 +17,10 @@ Deliver AgentClinic in a sequence of Nano phases. Each phase contains 1–3 focu
 
 **Feature slices**
 - Configure local SQLite access.
-- Initialize the database from an application schema setup.
+- Initialize the database by applying ordered, versioned migrations.
+- Add the first migration to create the agents table.
+- Create the ailments table and seed it with starter ailments, including “context-window claustrophobia” and “prompt fatigue”.
+- Seed the database with a handful of fictional agents, each linked to one or more seeded ailments.
 - Define the agent data model and SQLite table.
 - Add routes to create and list agents.
 - Define ailments and their relationship to agents.
@@ -27,7 +30,7 @@ Deliver AgentClinic in a sequence of Nano phases. Each phase contains 1–3 focu
 - Build a reusable JSX layout for the clinic pages with clear header, main, and footer sections.
 - Add consistent CSS styling for the dashboard and clinic pages, including responsive spacing and layout behavior.
 
-**Acceptance:** The app opens the configured database and initializes its schema successfully; agent, ailment, and therapy records can be created and retrieved from SQLite with the correct relationships and filtering; the page layout renders cleanly via JSX and the CSS keeps the clinic interface readable and usable across mobile and desktop widths.
+**Acceptance:** The app opens the configured database, applies pending migrations in order, and safely initializes its schema; a fresh database receives the initial agents migration, a handful of fictional agents each linked to one or more seeded ailments, and the required starter ailments; rerunning initialization does not duplicate seed records or overwrite user data. Agent, ailment, and therapy records can be created and retrieved from SQLite with the correct relationships and filtering; the page layout renders cleanly via JSX and the CSS keeps the clinic interface readable and usable across mobile and desktop widths.
 
 ## Nano Phase 3: Susan — Booking records
 
