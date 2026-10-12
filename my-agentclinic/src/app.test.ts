@@ -12,6 +12,7 @@ import {
   linkAilmentToAgent,
   linkTherapyToAilment,
   listAgents,
+  listAilments,
   listAilmentsForAgent,
   listTherapiesForAilment,
   openDatabase,
@@ -24,6 +25,13 @@ describe('AgentClinic Phase 2 routes', () => {
 
   beforeEach(() => {
     database = openDatabase(':memory:');
+    database.exec(`
+      DELETE FROM ailment_therapies;
+      DELETE FROM agent_ailments;
+      DELETE FROM therapies;
+      DELETE FROM ailments;
+      DELETE FROM agents;
+    `);
     app = createApp(database);
   });
 
@@ -38,6 +46,42 @@ describe('AgentClinic Phase 2 routes', () => {
     expect(listAgents(database)).toEqual([{ id: 1, name: 'Susan' }]);
   });
 
+  it('applies ordered migrations and seeds linked starter agents and ailments once', () => {
+    const freshDatabase = openDatabase(':memory:');
+    try {
+      const migrationVersions = freshDatabase
+        .prepare('SELECT version FROM schema_migrations ORDER BY version')
+        .all()
+        .map((row) => row.version);
+      expect(migrationVersions).toEqual([1, 2, 3]);
+
+      const agents = listAgents(freshDatabase);
+      const ailments = listAilments(freshDatabase);
+      expect(agents).toHaveLength(3);
+      expect(ailments.map((ailment) => ailment.name)).toContain(
+        'context-window claustrophobia',
+      );
+      expect(ailments.map((ailment) => ailment.name)).toContain('prompt fatigue');
+      expect(
+        agents.every((agent) => listAilmentsForAgent(freshDatabase, agent.id).length > 0),
+      ).toBe(true);
+
+      const originalLinkCount = freshDatabase
+        .prepare('SELECT COUNT(*) AS count FROM agent_ailments')
+        .get()?.count;
+      createAgent(freshDatabase, 'Local User');
+      initializeDatabase(freshDatabase);
+
+      expect(listAgents(freshDatabase)).toHaveLength(4);
+      expect(listAilments(freshDatabase)).toHaveLength(2);
+      expect(
+        freshDatabase.prepare('SELECT COUNT(*) AS count FROM agent_ailments').get()?.count,
+      ).toBe(originalLinkCount);
+    } finally {
+      freshDatabase.close();
+    }
+  });
+
   it('persists records when a file-backed database is reopened', () => {
     const directory = mkdtempSync(join(tmpdir(), 'agentclinic-'));
     try {
@@ -48,7 +92,9 @@ describe('AgentClinic Phase 2 routes', () => {
 
       const reopenedConnection = openDatabase(filename);
       try {
-        expect(listAgents(reopenedConnection)).toEqual([{ id: 1, name: 'Susan' }]);
+        expect(listAgents(reopenedConnection)).toHaveLength(4);
+        expect(listAgents(reopenedConnection)).toContainEqual({ id: 4, name: 'Susan' });
+        expect(listAgents(reopenedConnection)).toContainEqual({ id: 1, name: 'Ada Lovelace' });
       } finally {
         reopenedConnection.close();
       }

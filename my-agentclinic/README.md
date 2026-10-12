@@ -14,3 +14,7 @@
 - Use `npm run validate` when you want the project’s standard validation command for automated checks.
 - Build the production bundle with `npm run build`.
 - Keep the UI responsive and readable across mobile and desktop viewports while adding new pages and components.
+
+## Local database
+
+The application uses SQLite and applies schema migrations when it initializes the database. A fresh database is populated with a handful of fictional agents and starter ailments, including “context-window claustrophobia” and “prompt fatigue”; each starter agent is linked to at least one ailment. Initialization is safe to repeat and preserves existing user data.

@@ -7,7 +7,11 @@ Complete Nano Phase 2 of the AgentClinic roadmap by adding local SQLite persiste
 ## Scope
 
 - Configure local SQLite access in the existing TypeScript, Node.js, and Hono application.
-- Initialize the database schema from the application in an idempotent way and enforce foreign-key constraints.
+- Initialize the database from the application by applying ordered, versioned migrations and enforce foreign-key constraints.
+- Add the first migration to create the agents table.
+- Create the ailments table and seed it with starter ailments, including `context-window claustrophobia` and `prompt fatigue`.
+- Seed a handful (at least three) of fictional agents in a fresh database, and link every seeded agent to one or more seeded ailments through the agent-ailment relationship table.
+- Make migrations and seed initialization idempotent: re-running startup must not duplicate seed records or overwrite existing user data.
 - Persist agents with a generated identifier and a name.
 - Persist ailments with a generated identifier, name, and description.
 - Persist therapies with a generated identifier, name, and description.
@@ -26,11 +30,12 @@ Complete Nano Phase 2 of the AgentClinic roadmap by adding local SQLite persiste
 - The full agent dashboard and booking details described in later roadmap phases.
 - Authentication, authorization, deployment, or a remote database service.
 - A client-side application framework or JSON API.
-- Seed data, bulk import, or unrelated visual redesign of the home page.
+- Bulk import or unrelated visual redesign of the home page.
 
 ## Decisions
 
 - **Database:** Use Node.js's built-in `node:sqlite` module (Node.js 22.5 or newer). Persist data locally; keep runtime database files out of version control.
+- **Migrations and seed data:** Track and apply ordered schema migrations on startup. The first migration creates the agents table. Initialize starter agents and ailments only when their seed records are absent; include at least three fictional agents and the ailments `context-window claustrophobia` and `prompt fatigue`. Link every seeded agent to one or more seeded ailments. Repeated initialization must not duplicate seed records or relationship links, reset user changes, or destroy persisted data.
 - **Schema setup:** Initialize the application's schema safely on startup so a fresh database is ready and a restart does not destroy existing data.
 - **Relationships:** Use join tables for agents and ailments, and for ailments and therapies. Enforce references with SQLite foreign keys and avoid duplicate links.
 - **Baseline fields:** Agents have a name; ailments and therapies each have a name and description. Generate stable identifiers for records. Names are required; descriptions may be empty.
@@ -41,6 +46,6 @@ Complete Nano Phase 2 of the AgentClinic roadmap by adding local SQLite persiste
 
 ## Context
 
-The [roadmap](../roadmap.md) defines Nano Phase 2 as the SQLite foundation, agent/ailment/therapy data model and routes, and a reusable JSX/CSS layout. Its acceptance criteria require persisted records with correct relationships and a readable interface across mobile and desktop widths.
+The [roadmap](../roadmap.md) defines Nano Phase 2 as the SQLite foundation, versioned migrations, starter data, agent/ailment/therapy data model and routes, and a reusable JSX/CSS layout. Its acceptance criteria require safe migration and seed behavior, persisted records with correct relationships, and a readable interface across mobile and desktop widths.
 
 The [mission](../mission.md) calls for a dependable, approachable clinic experience for agents and staff. The [tech-stack guidance](../tech-stack.md) recommends TypeScript, Node.js, Hono with server-rendered JSX, SQLite, Vitest, and responsive CSS. This phase uses PicoCSS to provide the clinic interface's baseline styling, with minimal custom CSS for product-specific needs. It builds on the completed Nano Phase 1 home page and leaves booking and dashboard workflows for later phases.
