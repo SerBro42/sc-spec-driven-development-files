@@ -34,21 +34,24 @@ Deliver AgentClinic in a sequence of Nano phases. Each phase contains 1–3 focu
 
 **Acceptance:** The app opens the configured database, applies pending migrations in order, and safely initializes its schema; a fresh database receives the initial agents migration, a handful of fictional agents each linked to one or more seeded ailments, and the required starter ailments; rerunning initialization does not duplicate seed records or overwrite user data. Agent, ailment, and therapy records can be created and retrieved from SQLite with the correct relationships and filtering; the page layout renders cleanly via JSX and the CSS keeps the clinic interface readable and usable across mobile and desktop widths.
 
-## Nano Phase 3: Susan — Booking records
+## Nano Phase 3: Therapies Catalog
+
+**Feature slices**
+- Define the therapies data model and SQLite table.
+- Seed the therapies catalog with starter records for the supported ailments.
+- Expose therapy retrieval for the catalog and by ailment.
+
+**Acceptance:** Therapies are persisted in SQLite with the expected schema, seeded records are unique and reusable, and therapy data can be retrieved for a given ailment or catalog view.
+
+## Nano Phase 4: Appointment Booking
 
 **Feature slices**
 - Define the booking data model, including its agent, therapy, time, and status.
 - Persist bookings in SQLite with the required relationships.
-
-**Acceptance:** A booking can be saved and retrieved with its associated agent and therapy.
-
-## Nano Phase 4: Susan — Booking workflow
-
-**Feature slices**
 - Add a route to create a booking with input validation.
 - Add routes to list bookings and update their supported status.
 
-**Acceptance:** Valid bookings and status changes persist; invalid submissions receive clear errors.
+**Acceptance:** A booking can be saved and retrieved with its associated agent and therapy; valid bookings and status changes persist; invalid submissions receive clear errors.
 
 ## Nano Phase 5: Mary — Dashboard
 
