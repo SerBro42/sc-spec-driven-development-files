@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-10-12
+- Expanded the dashboard with clinic summary counts and staff tables for agents, ailments, therapies, and appointments.
 - Completed the MVP therapy catalog, ISO-8601 appointment booking and status workflow, and agent dashboard.
 - Added booking persistence, input validation, logged database errors, responsive navigation, end-to-end workflow tests, and empty/error states.
 - Marked Nano Phases 3–7 complete in the roadmap and recorded MVP acceptance criteria.

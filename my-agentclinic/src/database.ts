@@ -32,6 +32,12 @@ export interface Booking {
   therapyName: string;
 }
 
+export interface DashboardSummary {
+  agents: number;
+  openAppointments: number;
+  ailmentsInFlight: number;
+}
+
 export function openDatabase(
   filename = process.env.DATABASE_PATH ?? resolve('data', 'agentclinic.sqlite'),
 ): DatabaseSync {
@@ -516,4 +522,36 @@ export function listTherapiesForAgent(database: DatabaseSync, agentId: number): 
     `)
     .all(agentId)
     .map(mapTherapy);
+}
+
+export function listAgentsForAilment(database: DatabaseSync, ailmentId: number): Agent[] {
+  return database
+    .prepare(`
+      SELECT agents.id, agents.name
+      FROM agents
+      INNER JOIN agent_ailments ON agent_ailments.agent_id = agents.id
+      WHERE agent_ailments.ailment_id = ?
+      ORDER BY agents.name COLLATE NOCASE, agents.id
+    `)
+    .all(ailmentId)
+    .map(mapAgent);
+}
+
+export function getDashboardSummary(database: DatabaseSync): DashboardSummary {
+  const row = database
+    .prepare(`
+      SELECT
+        (SELECT COUNT(*) FROM agents) AS agents,
+        (SELECT COUNT(*) FROM bookings WHERE status = 'scheduled') AS open_appointments,
+        (SELECT COUNT(DISTINCT ailment_id) FROM agent_ailments) AS ailments_in_flight
+    `)
+    .get();
+  if (!row) {
+    throw new Error('Database did not return dashboard summary counts');
+  }
+  return {
+    agents: numberField(row, 'agents'),
+    openAppointments: numberField(row, 'open_appointments'),
+    ailmentsInFlight: numberField(row, 'ailments_in_flight'),
+  };
 }

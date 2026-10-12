@@ -109,6 +109,22 @@ describe('AgentClinic MVP workflow', () => {
     expect(listHtml).toContain(agent.name);
     expect(listHtml).toContain('2030-04-05T13:30:00.000Z');
 
+    const dashboardResponse = await app.request('http://localhost/dashboard');
+    const dashboardHtml = await dashboardResponse.text();
+    expect(dashboardResponse.status).toBe(200);
+    expect(dashboardHtml).toMatch(/Agents<\/p><strong>3<\/strong>/);
+    expect(dashboardHtml).toMatch(/Open appointments<\/p><strong>1<\/strong>/);
+    expect(dashboardHtml).toMatch(/Ailments in-flight<\/p><strong>2<\/strong>/);
+    expect(dashboardHtml).toContain('<caption>Clinic agents and their linked ailments</caption>');
+    expect(dashboardHtml).toContain('<caption>Ailments in the clinic caseload</caption>');
+    expect(dashboardHtml).toContain('<caption>Available therapies and their supported ailments</caption>');
+    expect(dashboardHtml).toContain('<caption>Scheduled, completed, and cancelled appointments</caption>');
+    expect(dashboardHtml).toContain('Context window reset');
+    expect(dashboardHtml).toContain('2030-04-05T13:30:00.000Z');
+    expect(dashboardHtml).toContain('dashboard-booking-status-1');
+    const agentsPage = await app.request('http://localhost/agents');
+    expect(await agentsPage.text()).not.toContain('Open appointments');
+
     for (const status of ['completed', 'cancelled', 'scheduled']) {
       const updateResponse = await app.request('http://localhost/bookings/1/status', {
         method: 'POST',
@@ -119,22 +135,27 @@ describe('AgentClinic MVP workflow', () => {
       expect(getBooking(database, 1)?.status).toBe(status);
     }
 
-    const dashboardResponse = await app.request(`http://localhost/agents/${agent.id}`);
-    const dashboardHtml = await dashboardResponse.text();
-    expect(dashboardResponse.status).toBe(200);
-    expect(dashboardHtml).toContain('Related therapies');
-    expect(dashboardHtml).toContain(therapy.name);
-    expect(dashboardHtml).toContain('Appointments');
-    expect(dashboardHtml).toContain('2030-04-05T13:30:00.000Z');
+    const agentDetailResponse = await app.request(`http://localhost/agents/${agent.id}`);
+    const agentDetailHtml = await agentDetailResponse.text();
+    expect(agentDetailResponse.status).toBe(200);
+    expect(agentDetailHtml).toContain('Related therapies');
+    expect(agentDetailHtml).toContain(therapy.name);
+    expect(agentDetailHtml).toContain('Appointments');
+    expect(agentDetailHtml).toContain('2030-04-05T13:30:00.000Z');
   });
 
-  it('serves the dashboard agent list and handles agents without bookings and unknown agents', async () => {
+  it('serves dashboard summary counts and handles empty agent bookings and unknown agents', async () => {
     const response = await app.request('http://localhost/dashboard');
     const html = await response.text();
 
     expect(response.status).toBe(200);
-    expect(html).toContain('Clinic agents');
+    expect(html).toContain('AgentClinic dashboard');
+    expect(html).toMatch(/Agents<\/p><strong>3<\/strong>/);
+    expect(html).toMatch(/Open appointments<\/p><strong>0<\/strong>/);
+    expect(html).toMatch(/Ailments in-flight<\/p><strong>2<\/strong>/);
     expect(html).toContain('href="/agents/1"');
+    expect(html).toContain('href="/ailments/1"');
+    expect(html).toContain('href="/therapies#therapy-1"');
     const agentDetail = await app.request('http://localhost/agents/1');
     expect(await agentDetail.text()).toContain('No appointments are booked for this agent yet.');
 
@@ -158,7 +179,7 @@ describe('AgentClinic MVP workflow', () => {
       app.request('http://localhost/therapies'),
       app.request('http://localhost/bookings'),
     ]);
-    expect(await agents.text()).toContain('No agents yet.');
+    expect(await agents.text()).toContain('No agents are available.');
     expect(await therapies.text()).toContain('No therapies are available yet.');
     expect(await bookings.text()).toContain('No appointments have been booked yet.');
   });

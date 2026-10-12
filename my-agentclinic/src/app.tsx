@@ -29,6 +29,7 @@ import {
   BookingForm,
   BookingList,
   BookingListPage,
+  Dashboard,
   TherapyCatalog,
 } from './components/MvpPages';
 
@@ -105,8 +106,8 @@ const AgentList = ({ database, error, name = '' }: AgentListProps) => {
   const agents = listAgents(database);
   return (
     <Layout>
-      <h1>Agent dashboard</h1>
-      <p>Review each agent's ailments, related therapies, and appointments.</p>
+      <h1>Agents</h1>
+      <p>Choose an agent to review their ailments and explore care options.</p>
       {error ? <p role="alert">{error}</p> : null}
       <section aria-labelledby="agent-list-heading">
         <h2 id="agent-list-heading">Clinic agents</h2>
@@ -357,7 +358,7 @@ export function createApp(database: DatabaseSync): Hono {
   app.use('/pico.min.css', serveStatic({ root: './node_modules/@picocss/pico/css' }));
 
   app.get('/', (c) => c.html(<Layout />));
-  app.get('/dashboard', (c) => c.html(<AgentList database={database} />));
+  app.get('/dashboard', (c) => c.html(<Dashboard database={database} />));
   app.get('/agents', (c) => c.html(<AgentList database={database} />));
   app.post('/agents', async (c) => {
     const form = await c.req.parseBody();

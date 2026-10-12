@@ -14,10 +14,10 @@
    - Add tests for persistence, associations, valid creation and status updates, and invalid or unknown references.
 
 3. **[x] Build the agent dashboard**
-   - Add a dashboard that lists agents and links to their detail views.
-   - Show an agent's linked ailments, therapies related to those ailments, and bookings.
-   - Render useful empty states and a clear response for an unknown agent ID.
-   - Add route tests for populated data, empty data, and unknown IDs.
+   - Make `/dashboard` distinct from `/agents`, with summary counts for total agents, scheduled appointments, and distinct ailments linked to agents.
+   - Add read-only staff tables for agents, ailments, therapies, and appointments, with links to existing record workflows and appointment status controls.
+   - Keep an agent's ailments, related therapies, and bookings on the agent detail view; render useful empty states and a clear response for an unknown agent ID.
+   - Add route tests for summary count definitions, populated tables, empty data, and unknown IDs.
 
 4. **[x] Polish the clinic workflow**
    - Integrate catalog, booking, dashboard, and existing clinic navigation through the shared JSX layout.

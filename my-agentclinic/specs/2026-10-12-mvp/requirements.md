@@ -16,9 +16,10 @@ This feature work completes the unfinished roadmap features after Nano Phase 2:
   - Provide server-rendered flows to create bookings, list them, and update their status.
   - Validate input and referenced records and return clear errors for invalid submissions.
 - **Nano Phase 5 — Dashboard**
-  - List agents and link to each agent's details.
-  - Show each agent's ailments, related therapies, and bookings.
-  - Handle empty data and unknown agent IDs clearly.
+  - Give `/dashboard` a clinic-wide summary distinct from the `/agents` list, with counts for agents, open appointments, and ailments in-flight.
+  - Count open appointments as bookings with `scheduled` status; count ailments in-flight as distinct ailments linked to one or more agents.
+  - Present read-only staff tables for agents, ailments, therapies, and appointments, with links to existing create/detail workflows and appointment status controls.
+  - Keep each agent's ailments, related therapies, and bookings on the agent detail page; handle empty data and unknown agent IDs clearly.
 - **Nano Phase 6 — Polish**
   - Style dashboard and booking pages consistently with the existing clinic interface.
   - Keep forms, content, navigation, and actions readable and usable on narrow and wide screens.
@@ -41,6 +42,8 @@ This feature work completes the unfinished roadmap features after Nano Phase 2:
 - **Existing therapy capability:** Nano Phase 2 already defines and persists therapies and supports retrieval for an ailment. The catalog work should build on this implementation and add the roadmap's catalog-wide view and starter catalog data as needed, avoiding duplicate data models or routes.
 - **Booking data:** A booking has an identifier and references an existing agent and therapy; it also stores an ISO-8601 appointment time and a status.
 - **Booking statuses:** Support `scheduled`, `completed`, and `cancelled`. Provide the roadmap's status-update workflow for these values. Do not impose additional status-transition rules unless required by existing repository conventions.
+- **Dashboard counts:** "Open appointments" means bookings whose current status is `scheduled`. "Ailments in-flight" means the distinct ailments currently linked to at least one agent, independent of booking status.
+- **Dashboard tables:** The dashboard tables are read-only for agent, ailment, therapy, and appointment details. Use links to the existing record views and create flows rather than adding inline edit/delete capabilities; retain appointment status updates in the appointments table.
 - **Persistence:** Use the existing SQLite setup, schema migration conventions, data-access patterns, and foreign-key relationships. Booking records must survive application restart.
 - **Web experience:** Keep the existing Hono server-rendered HTML/JSX patterns and shared clinic layout. Use the existing styling approach and add only the CSS needed for consistent responsive dashboard and booking pages.
 - **Errors and empty states:** Invalid booking input and references to unknown agents or therapies must produce clear user-facing errors and must not create a booking. Empty catalog, booking, and agent views, and unknown dashboard agent IDs, must be handled clearly.

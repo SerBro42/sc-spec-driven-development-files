@@ -10,7 +10,8 @@
   - bookings can be listed with their associated agent and therapy;
   - valid status updates persist for `scheduled`, `completed`, and `cancelled`;
   - invalid input, unsupported statuses, and unknown agent or therapy IDs produce clear errors and do not create or corrupt records.
-- Dashboard route tests verify the agent list and detail view, including linked ailments, related therapies, bookings, empty states, and an unknown agent ID.
+- Dashboard route tests verify that `/dashboard` is distinct from `/agents`, displays correct counts for total agents, `scheduled` appointments, and distinct ailments linked to agents, and renders staff tables for agents, ailments, therapies, and appointments.
+- Dashboard table tests verify record links and appointment status controls; agent detail tests cover linked ailments, related therapies, bookings, empty states, and an unknown agent ID.
 - Tests cover expected request and database errors without success-shaped responses or unhandled errors.
 - Existing Nano Phase 1 and 2 tests continue to pass.
 
@@ -19,10 +20,11 @@
 1. Start the application using its documented development command and confirm the existing clinic pages continue to load.
 2. Open the therapies catalog and confirm the seeded catalog is available; open an ailment's therapy view and confirm it shows only therapies associated with that ailment.
 3. Open the dashboard and confirm agents link to detail views containing their ailments, related therapies, and bookings.
-4. Create a booking for an existing agent and therapy with an ISO-8601 appointment time and `scheduled` status; confirm the booking appears in the booking list and the agent's dashboard detail.
-5. Update the booking to `completed` and `cancelled` in turn and confirm each supported status is displayed and persisted after restarting the application.
-6. Submit invalid booking values and unknown agent/therapy IDs; confirm no invalid booking is saved and a clear error is shown.
-7. Review the catalog, dashboard, booking forms, lists, and actions at narrow mobile and wide desktop viewport sizes; confirm content and controls remain readable and usable.
+4. Confirm dashboard summary counts match persisted data: all agents, only scheduled appointments as open, and distinct ailments linked to one or more agents as in-flight. Review the agents, ailments, therapies, and appointments tables and follow their detail/create/status links.
+5. Create a booking for an existing agent and therapy with an ISO-8601 appointment time and `scheduled` status; confirm the booking appears in the booking list, dashboard table, and agent detail.
+6. Update the booking to `completed` and `cancelled` in turn and confirm each supported status is displayed and persisted after restarting the application.
+7. Submit invalid booking values and unknown agent/therapy IDs; confirm no invalid booking is saved and a clear error is shown.
+8. Review the catalog, dashboard tables, booking forms, lists, and actions at narrow mobile and wide desktop viewport sizes; confirm content and controls remain readable and usable.
 
 ## Merge criteria
 

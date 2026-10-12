@@ -62,10 +62,12 @@ Deliver AgentClinic in a sequence of Nano phases. Each phase contains 1–3 focu
 **Status:** Complete
 
 **Feature slices**
-- Add a dashboard page that lists agents and links to their details.
-- Show an agent’s ailments, related therapies, and bookings.
+- Add a clinic-wide `/dashboard` page with summary counts for agents, open appointments, and ailments in-flight.
+- Show simple staff table views for agents, ailments, therapies, and appointments, with links to existing record workflows.
+- Keep appointment status updates available from the appointment table.
+- Show an agent’s ailments, related therapies, and bookings on the agent detail page.
 
-**Acceptance:** The dashboard presents the persisted clinic data and handles empty lists and unknown agent IDs.
+**Acceptance:** `/dashboard` is distinct from the agent list and shows persisted summary counts; open appointments count bookings with `scheduled` status, and ailments in-flight count distinct ailments linked to one or more agents. Staff can review the persisted agents, ailments, therapies, and appointments in clear table views and follow links to existing create/detail/status workflows. Empty tables and unknown agent IDs are handled clearly.
 
 ## Nano Phase 6: Steve — Polish
 
