@@ -15,6 +15,8 @@ Deliver AgentClinic in a sequence of Nano phases. Each phase contains 1–3 focu
 
 ## Nano Phase 2: SQLite foundation, Susan data model, and JSX/CSS layout
 
+**Status:** Complete
+
 **Feature slices**
 - Configure local SQLite access.
 - Initialize the database by applying ordered, versioned migrations.

@@ -1,6 +1,8 @@
 # Changelog
 
 ## 2026-10-12
+- Completed Nano Phase 2 with ordered SQLite migrations, idempotent starter agents and ailments, agent-ailment links, server-rendered clinic workflows, and responsive JSX/CSS layout.
+- Implemented ordered SQLite migrations and seeded three fictional agents, starter ailments, and idempotent links from each agent to an ailment.
 - Updated Nano Phase 2 to require versioned SQLite migrations, a first agents-table migration, and idempotent fictional agent and ailment seed data with every seeded agent linked to at least one ailment.
 - Updated the feature plan, requirements, validation criteria, README, and tech-stack guidance to reflect the database setup.
 

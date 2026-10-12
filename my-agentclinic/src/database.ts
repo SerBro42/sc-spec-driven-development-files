@@ -37,41 +37,128 @@ export function openDatabase(
 export function initializeDatabase(database: DatabaseSync): void {
   database.exec('PRAGMA foreign_keys = ON');
   database.exec(`
-    CREATE TABLE IF NOT EXISTS agents (
-      id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL CHECK (
-        length(trim(name)) > 0 AND length(name) <= 120
-      )
-    );
-
-    CREATE TABLE IF NOT EXISTS ailments (
-      id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL CHECK (
-        length(trim(name)) > 0 AND length(name) <= 120
-      ),
-      description TEXT NOT NULL DEFAULT '' CHECK (length(description) <= 1000)
-    );
-
-    CREATE TABLE IF NOT EXISTS therapies (
-      id INTEGER PRIMARY KEY,
-      name TEXT NOT NULL CHECK (
-        length(trim(name)) > 0 AND length(name) <= 120
-      ),
-      description TEXT NOT NULL DEFAULT '' CHECK (length(description) <= 1000)
-    );
-
-    CREATE TABLE IF NOT EXISTS agent_ailments (
-      agent_id INTEGER NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
-      ailment_id INTEGER NOT NULL REFERENCES ailments(id) ON DELETE CASCADE,
-      PRIMARY KEY (agent_id, ailment_id)
-    );
-
-    CREATE TABLE IF NOT EXISTS ailment_therapies (
-      ailment_id INTEGER NOT NULL REFERENCES ailments(id) ON DELETE CASCADE,
-      therapy_id INTEGER NOT NULL REFERENCES therapies(id) ON DELETE CASCADE,
-      PRIMARY KEY (ailment_id, therapy_id)
-    );
+    CREATE TABLE IF NOT EXISTS schema_migrations (
+      version INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
   `);
+
+  const migrations: Array<{ version: number; name: string; apply: () => void }> = [
+    {
+      version: 1,
+      name: 'create_agents',
+      apply: () => database.exec(`
+        CREATE TABLE IF NOT EXISTS agents (
+          id INTEGER PRIMARY KEY,
+          name TEXT NOT NULL CHECK (
+            length(trim(name)) > 0 AND length(name) <= 120
+          )
+        )
+      `),
+    },
+    {
+      version: 2,
+      name: 'create_ailments_therapies_and_relationships',
+      apply: () => database.exec(`
+        CREATE TABLE IF NOT EXISTS ailments (
+          id INTEGER PRIMARY KEY,
+          name TEXT NOT NULL CHECK (
+            length(trim(name)) > 0 AND length(name) <= 120
+          ),
+          description TEXT NOT NULL DEFAULT '' CHECK (length(description) <= 1000)
+        );
+
+        CREATE TABLE IF NOT EXISTS therapies (
+          id INTEGER PRIMARY KEY,
+          name TEXT NOT NULL CHECK (
+            length(trim(name)) > 0 AND length(name) <= 120
+          ),
+          description TEXT NOT NULL DEFAULT '' CHECK (length(description) <= 1000)
+        );
+
+        CREATE TABLE IF NOT EXISTS agent_ailments (
+          agent_id INTEGER NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
+          ailment_id INTEGER NOT NULL REFERENCES ailments(id) ON DELETE CASCADE,
+          PRIMARY KEY (agent_id, ailment_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS ailment_therapies (
+          ailment_id INTEGER NOT NULL REFERENCES ailments(id) ON DELETE CASCADE,
+          therapy_id INTEGER NOT NULL REFERENCES therapies(id) ON DELETE CASCADE,
+          PRIMARY KEY (ailment_id, therapy_id)
+        )
+      `),
+    },
+    {
+      version: 3,
+      name: 'seed_starter_agents_and_ailments',
+      apply: () => seedStarterData(database),
+    },
+  ];
+
+  for (const migration of migrations) {
+    const applied = database
+      .prepare('SELECT version FROM schema_migrations WHERE version = ?')
+      .get(migration.version);
+    if (applied) {
+      continue;
+    }
+
+    transaction(database, () => {
+      migration.apply();
+      database
+        .prepare('INSERT INTO schema_migrations (version, name) VALUES (?, ?)')
+        .run(migration.version, migration.name);
+    });
+  }
+}
+
+function seedStarterData(database: DatabaseSync): void {
+  const agents = ['Ada Lovelace', 'Turing-7', 'Mira Chen'];
+  const ailments = [
+    {
+      name: 'context-window claustrophobia',
+      description: 'Feeling boxed in when the available context gets crowded.',
+    },
+    {
+      name: 'prompt fatigue',
+      description: 'Difficulty staying focused after too many prompt revisions.',
+    },
+  ];
+
+  const insertAilment = database.prepare(`
+    INSERT INTO ailments (name, description)
+    SELECT ?, ?
+    WHERE NOT EXISTS (
+      SELECT 1 FROM ailments WHERE name = ? COLLATE NOCASE
+    )
+  `);
+  for (const ailment of ailments) {
+    insertAilment.run(ailment.name, ailment.description, ailment.name);
+  }
+
+  const insertAgent = database.prepare(`
+    INSERT INTO agents (name)
+    SELECT ?
+    WHERE NOT EXISTS (
+      SELECT 1 FROM agents WHERE name = ? COLLATE NOCASE
+    )
+  `);
+  const linkAgentToAilment = database.prepare(`
+    INSERT OR IGNORE INTO agent_ailments (agent_id, ailment_id)
+    SELECT
+      (SELECT id FROM agents WHERE name = ? COLLATE NOCASE ORDER BY id LIMIT 1),
+      (SELECT id FROM ailments WHERE name = ? COLLATE NOCASE ORDER BY id LIMIT 1)
+    WHERE EXISTS (SELECT 1 FROM agents WHERE name = ? COLLATE NOCASE)
+      AND EXISTS (SELECT 1 FROM ailments WHERE name = ? COLLATE NOCASE)
+  `);
+
+  for (const [index, name] of agents.entries()) {
+    insertAgent.run(name, name);
+    const ailment = ailments[index % ailments.length];
+    linkAgentToAilment.run(name, ailment.name, name, ailment.name);
+  }
 }
 
 function numberField(row: Record<string, SQLOutputValue>, field: string): number {
