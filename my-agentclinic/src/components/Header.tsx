@@ -10,7 +10,16 @@ export const Header = () => (
       </ul>
       <ul>
         <li>
+          <a href="/dashboard">Dashboard</a>
+        </li>
+        <li>
           <a href="/agents">Agents</a>
+        </li>
+        <li>
+          <a href="/therapies">Therapies</a>
+        </li>
+        <li>
+          <a href="/bookings">Appointments</a>
         </li>
       </ul>
     </nav>

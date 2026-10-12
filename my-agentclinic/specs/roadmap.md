@@ -36,6 +36,8 @@ Deliver AgentClinic in a sequence of Nano phases. Each phase contains 1–3 focu
 
 ## Nano Phase 3: Therapies Catalog
 
+**Status:** Complete
+
 **Feature slices**
 - Define the therapies data model and SQLite table.
 - Seed the therapies catalog with starter records for the supported ailments.
@@ -44,6 +46,8 @@ Deliver AgentClinic in a sequence of Nano phases. Each phase contains 1–3 focu
 **Acceptance:** Therapies are persisted in SQLite with the expected schema, seeded records are unique and reusable, and therapy data can be retrieved for a given ailment or catalog view.
 
 ## Nano Phase 4: Appointment Booking
+
+**Status:** Complete
 
 **Feature slices**
 - Define the booking data model, including its agent, therapy, time, and status.
@@ -55,6 +59,8 @@ Deliver AgentClinic in a sequence of Nano phases. Each phase contains 1–3 focu
 
 ## Nano Phase 5: Mary — Dashboard
 
+**Status:** Complete
+
 **Feature slices**
 - Add a dashboard page that lists agents and links to their details.
 - Show an agent’s ailments, related therapies, and bookings.
@@ -63,6 +69,8 @@ Deliver AgentClinic in a sequence of Nano phases. Each phase contains 1–3 focu
 
 ## Nano Phase 6: Steve — Polish
 
+**Status:** Complete
+
 **Feature slices**
 - Apply consistent visual styling to dashboard and booking pages.
 - Make the main clinic workflow responsive for narrow and wide screens, with layout adjustments that keep forms, content, and actions usable on phones and desktops.
@@ -70,6 +78,8 @@ Deliver AgentClinic in a sequence of Nano phases. Each phase contains 1–3 focu
 **Acceptance:** The core workflow remains readable and usable at both small and large viewport sizes, and the layout adapts without breaking the user experience.
 
 ## Nano Phase 7: Hardening
+
+**Status:** Complete
 
 **Feature slices**
 - Add focused tests for the main routes and booking workflow.

@@ -53,7 +53,7 @@ describe('AgentClinic Phase 2 routes', () => {
         .prepare('SELECT version FROM schema_migrations ORDER BY version')
         .all()
         .map((row) => row.version);
-      expect(migrationVersions).toEqual([1, 2, 3]);
+      expect(migrationVersions).toEqual([1, 2, 3, 4, 5]);
 
       const agents = listAgents(freshDatabase);
       const ailments = listAilments(freshDatabase);
@@ -126,8 +126,8 @@ describe('AgentClinic Phase 2 routes', () => {
     expect(html).toContain('<header class="site-header">');
     expect(html).toContain('<main class="container site-main">');
     expect(html).toContain('<footer class="site-footer">');
-    expect(html).toContain('Upcoming clinic features');
-    expect(html).toContain('href="/agents"');
+    expect(html).toContain('explore therapies');
+    expect(html).toContain('href="/dashboard"');
     expect(html).toContain('href="/pico.min.css"');
   });
 

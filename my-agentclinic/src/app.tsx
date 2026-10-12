@@ -5,19 +5,32 @@ import type { DatabaseSync } from 'node:sqlite';
 import {
   createAgent,
   createAilmentForAgent,
+  createBooking,
   createTherapyForAilment,
   getAgent,
   getAilment,
+  getBooking,
   getTherapy,
   linkAilmentToAgent,
   linkTherapyToAilment,
   listAgents,
   listAilments,
   listAilmentsForAgent,
+  listBookings,
+  listBookingsForAgent,
   listTherapies,
+  listTherapiesForAgent,
   listTherapiesForAilment,
+  updateBookingStatus,
 } from './database';
+import type { BookingStatus } from './database';
 import { Layout } from './components/Layout';
+import {
+  BookingForm,
+  BookingList,
+  BookingListPage,
+  TherapyCatalog,
+} from './components/MvpPages';
 
 type FormData = Record<string, string | File | (string | File)[]>;
 
@@ -59,6 +72,23 @@ function parseId(value: string): number | null {
   return Number.isSafeInteger(id) ? id : null;
 }
 
+function parseAppointmentTime(value: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)) {
+    return null;
+  }
+  const datePart = value.slice(0, 10);
+  const parsedDate = new Date(`${datePart}T00:00:00.000Z`);
+  if (Number.isNaN(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== datePart) {
+    return null;
+  }
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? null : new Date(timestamp).toISOString();
+}
+
+function isBookingStatus(value: string): value is BookingStatus {
+  return value === 'scheduled' || value === 'completed' || value === 'cancelled';
+}
+
 function messagePage(title: string, message: string) {
   return (
     <Layout>
@@ -75,8 +105,8 @@ const AgentList = ({ database, error, name = '' }: AgentListProps) => {
   const agents = listAgents(database);
   return (
     <Layout>
-      <h1>Agents</h1>
-      <p>Choose an agent to review their ailments and explore care options.</p>
+      <h1>Agent dashboard</h1>
+      <p>Review each agent's ailments, related therapies, and appointments.</p>
       {error ? <p role="alert">{error}</p> : null}
       <section aria-labelledby="agent-list-heading">
         <h2 id="agent-list-heading">Clinic agents</h2>
@@ -118,6 +148,8 @@ const AgentDetails = ({
 
   const ailments = listAilmentsForAgent(database, agentId);
   const allAilments = listAilments(database);
+  const therapies = listTherapiesForAgent(database, agentId);
+  const bookings = listBookingsForAgent(database, agentId);
   return (
     <Layout>
       <p>
@@ -139,6 +171,43 @@ const AgentDetails = ({
         ) : (
           <p>No ailments are linked to this agent yet.</p>
         )}
+      </section>
+      <section aria-labelledby="agent-therapy-heading">
+        <h2 id="agent-therapy-heading">Related therapies</h2>
+        {therapies.length ? (
+          <ul>
+            {therapies.map((therapy) => (
+              <li key={therapy.id}>
+                <a href={`/therapies#therapy-${therapy.id}`}>{therapy.name}</a>
+                {therapy.description ? <p>{therapy.description}</p> : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No therapies are available for this agent's ailments yet.</p>
+        )}
+        <p>
+          <a href="/therapies">Browse the therapy catalog</a>
+        </p>
+      </section>
+      <section aria-labelledby="agent-bookings-heading">
+        <h2 id="agent-bookings-heading">Appointments</h2>
+        {bookings.length ? (
+          <ul>
+            {bookings.map((booking) => (
+              <li key={booking.id}>
+                <strong>{booking.therapyName}</strong> —{' '}
+                <time dateTime={booking.appointmentTime}>{booking.appointmentTime}</time> (
+                {booking.status})
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No appointments are booked for this agent yet.</p>
+        )}
+        <p>
+          <a href="/bookings/new">Book an appointment</a>
+        </p>
       </section>
       <section class="grid">
         <article>
@@ -276,10 +345,19 @@ const AilmentDetails = ({
 export function createApp(database: DatabaseSync): Hono {
   const app = new Hono();
 
+  app.onError((error, c) => {
+    console.error('AgentClinic request failed:', error);
+    return c.html(
+      messagePage('Clinic error', 'The clinic could not complete your request. Please try again.'),
+      500,
+    );
+  });
+
   app.use('/styles.css', serveStatic({ root: './public' }));
   app.use('/pico.min.css', serveStatic({ root: './node_modules/@picocss/pico/css' }));
 
   app.get('/', (c) => c.html(<Layout />));
+  app.get('/dashboard', (c) => c.html(<AgentList database={database} />));
   app.get('/agents', (c) => c.html(<AgentList database={database} />));
   app.post('/agents', async (c) => {
     const form = await c.req.parseBody();
@@ -458,6 +536,87 @@ export function createApp(database: DatabaseSync): Hono {
       return c.redirect(`/ailments/${ailmentId}`, 303);
     }
     return c.html(messagePage('Invalid request', 'Choose whether to create or link a therapy.'), 400);
+  });
+
+  app.get('/therapies', (c) => c.html(<TherapyCatalog database={database} />));
+
+  app.get('/bookings', (c) =>
+    c.html(<BookingListPage database={database} />),
+  );
+
+  app.get('/bookings/new', (c) => c.html(<BookingForm database={database} />));
+
+  app.post('/bookings', async (c) => {
+    const form = await c.req.parseBody();
+    const agentIdValue = formValue(form, 'agentId');
+    const therapyIdValue = formValue(form, 'therapyId');
+    const appointmentTimeValue = formValue(form, 'appointmentTime');
+    const agentId = parseId(agentIdValue);
+    const therapyId = parseId(therapyIdValue);
+    const appointmentTime = parseAppointmentTime(appointmentTimeValue);
+    const values = {
+      agentId: agentIdValue,
+      therapyId: therapyIdValue,
+      appointmentTime: appointmentTimeValue,
+    };
+
+    if (agentId === null || therapyId === null) {
+      return c.html(
+        <BookingForm
+          database={database}
+          error="Choose an existing agent and therapy."
+          {...values}
+        />,
+        400,
+      );
+    }
+    if (!getAgent(database, agentId)) {
+      return c.html(
+        <BookingForm database={database} error="The selected agent does not exist." {...values} />,
+        404,
+      );
+    }
+    if (!getTherapy(database, therapyId)) {
+      return c.html(
+        <BookingForm database={database} error="The selected therapy does not exist." {...values} />,
+        404,
+      );
+    }
+    if (appointmentTime === null) {
+      return c.html(
+        <BookingForm
+          database={database}
+          error="Enter a valid ISO-8601 appointment time with a timezone."
+          {...values}
+        />,
+        400,
+      );
+    }
+
+    const bookingId = createBooking(database, agentId, therapyId, appointmentTime);
+    return c.redirect(`/bookings#booking-${bookingId}`, 303);
+  });
+
+  app.post('/bookings/:bookingId/status', async (c) => {
+    const bookingId = parseId(c.req.param('bookingId'));
+    if (bookingId === null || !getBooking(database, bookingId)) {
+      return c.html(messagePage('Appointment not found', 'This appointment does not exist.'), 404);
+    }
+
+    const form = await c.req.parseBody();
+    const status = formValue(form, 'status');
+    if (!isBookingStatus(status)) {
+      return c.html(
+        <BookingList
+          bookings={listBookings(database)}
+          error="Choose a supported appointment status: scheduled, completed, or cancelled."
+        />,
+        400,
+      );
+    }
+
+    updateBookingStatus(database, bookingId, status);
+    return c.redirect(`/bookings#booking-${bookingId}`, 303);
   });
 
   return app;

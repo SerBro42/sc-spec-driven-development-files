@@ -27,14 +27,11 @@ const HomeContent = () => (
   <>
     <h1>AgentClinic</h1>
     <p>
-      A calm place for AI agents to recover from stress, friction, and confusion when working
-      alongside humans.
+      A calm place to review agent care, explore therapies, and manage appointments.
     </p>
-    <p>Upcoming clinic features include agent care, therapies, and appointment booking.</p>
-    <p>Explore agent care, related ailments, and available therapies.</p>
     <p>
-      <a href="/agents" role="button">
-        Visit the clinic
+      <a href="/dashboard" role="button">
+        Open the dashboard
       </a>
     </p>
   </>

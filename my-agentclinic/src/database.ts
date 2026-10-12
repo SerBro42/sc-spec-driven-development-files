@@ -20,6 +20,18 @@ export interface Therapy {
   description: string;
 }
 
+export type BookingStatus = 'scheduled' | 'completed' | 'cancelled';
+
+export interface Booking {
+  id: number;
+  agentId: number;
+  therapyId: number;
+  appointmentTime: string;
+  status: BookingStatus;
+  agentName: string;
+  therapyName: string;
+}
+
 export function openDatabase(
   filename = process.env.DATABASE_PATH ?? resolve('data', 'agentclinic.sqlite'),
 ): DatabaseSync {
@@ -95,6 +107,25 @@ export function initializeDatabase(database: DatabaseSync): void {
       name: 'seed_starter_agents_and_ailments',
       apply: () => seedStarterData(database),
     },
+    {
+      version: 4,
+      name: 'seed_starter_therapies',
+      apply: () => seedStarterTherapies(database),
+    },
+    {
+      version: 5,
+      name: 'create_bookings',
+      apply: () => database.exec(`
+        CREATE TABLE IF NOT EXISTS bookings (
+          id INTEGER PRIMARY KEY,
+          agent_id INTEGER NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
+          therapy_id INTEGER NOT NULL REFERENCES therapies(id) ON DELETE CASCADE,
+          appointment_time TEXT NOT NULL CHECK (length(trim(appointment_time)) > 0),
+          status TEXT NOT NULL DEFAULT 'scheduled'
+            CHECK (status IN ('scheduled', 'completed', 'cancelled'))
+        )
+      `),
+    },
   ];
 
   for (const migration of migrations) {
@@ -161,6 +192,46 @@ function seedStarterData(database: DatabaseSync): void {
   }
 }
 
+function seedStarterTherapies(database: DatabaseSync): void {
+  const starterTherapies = [
+    {
+      name: 'Context window reset',
+      description: 'A guided pause to prioritize context and make room for the next task.',
+      ailment: 'context-window claustrophobia',
+    },
+    {
+      name: 'Prompt pacing session',
+      description: 'A structured break between prompt revisions to restore focus.',
+      ailment: 'prompt fatigue',
+    },
+    {
+      name: 'Guided focus reset',
+      description: 'A short restorative exercise for attention and task switching.',
+      ailment: 'prompt fatigue',
+    },
+  ];
+  const insertTherapy = database.prepare(`
+    INSERT INTO therapies (name, description)
+    SELECT ?, ?
+    WHERE NOT EXISTS (
+      SELECT 1 FROM therapies WHERE name = ? COLLATE NOCASE
+    )
+  `);
+  const linkTherapy = database.prepare(`
+    INSERT OR IGNORE INTO ailment_therapies (ailment_id, therapy_id)
+    SELECT
+      (SELECT id FROM ailments WHERE name = ? COLLATE NOCASE ORDER BY id LIMIT 1),
+      (SELECT id FROM therapies WHERE name = ? COLLATE NOCASE ORDER BY id LIMIT 1)
+    WHERE EXISTS (SELECT 1 FROM ailments WHERE name = ? COLLATE NOCASE)
+      AND EXISTS (SELECT 1 FROM therapies WHERE name = ? COLLATE NOCASE)
+  `);
+
+  for (const therapy of starterTherapies) {
+    insertTherapy.run(therapy.name, therapy.description, therapy.name);
+    linkTherapy.run(therapy.ailment, therapy.name, therapy.ailment, therapy.name);
+  }
+}
+
 function numberField(row: Record<string, SQLOutputValue>, field: string): number {
   const value = row[field];
   if (typeof value !== 'number') {
@@ -194,6 +265,22 @@ function mapTherapy(row: Record<string, SQLOutputValue>): Therapy {
     id: numberField(row, 'id'),
     name: stringField(row, 'name'),
     description: stringField(row, 'description'),
+  };
+}
+
+function mapBooking(row: Record<string, SQLOutputValue>): Booking {
+  const status = stringField(row, 'status');
+  if (status !== 'scheduled' && status !== 'completed' && status !== 'cancelled') {
+    throw new Error('Database returned an invalid booking status');
+  }
+  return {
+    id: numberField(row, 'id'),
+    agentId: numberField(row, 'agent_id'),
+    therapyId: numberField(row, 'therapy_id'),
+    appointmentTime: stringField(row, 'appointment_time'),
+    status,
+    agentName: stringField(row, 'agent_name'),
+    therapyName: stringField(row, 'therapy_name'),
   };
 }
 
@@ -315,6 +402,19 @@ export function listTherapiesForAilment(database: DatabaseSync, ailmentId: numbe
     .map(mapTherapy);
 }
 
+export function listAilmentsForTherapy(database: DatabaseSync, therapyId: number): Ailment[] {
+  return database
+    .prepare(`
+      SELECT ailments.id, ailments.name, ailments.description
+      FROM ailments
+      INNER JOIN ailment_therapies ON ailment_therapies.ailment_id = ailments.id
+      WHERE ailment_therapies.therapy_id = ?
+      ORDER BY ailments.name COLLATE NOCASE, ailments.id
+    `)
+    .all(therapyId)
+    .map(mapAilment);
+}
+
 export function createTherapyForAilment(
   database: DatabaseSync,
   ailmentId: number,
@@ -341,4 +441,79 @@ export function linkTherapyToAilment(
   database
     .prepare('INSERT OR IGNORE INTO ailment_therapies (ailment_id, therapy_id) VALUES (?, ?)')
     .run(ailmentId, therapyId);
+}
+
+const bookingSelect = `
+  SELECT
+    bookings.id,
+    bookings.agent_id,
+    bookings.therapy_id,
+    bookings.appointment_time,
+    bookings.status,
+    agents.name AS agent_name,
+    therapies.name AS therapy_name
+  FROM bookings
+  INNER JOIN agents ON agents.id = bookings.agent_id
+  INNER JOIN therapies ON therapies.id = bookings.therapy_id
+`;
+
+export function getBooking(database: DatabaseSync, id: number): Booking | null {
+  const row = database.prepare(`${bookingSelect} WHERE bookings.id = ?`).get(id);
+  return row ? mapBooking(row) : null;
+}
+
+export function listBookings(database: DatabaseSync): Booking[] {
+  return database
+    .prepare(`${bookingSelect} ORDER BY bookings.appointment_time, bookings.id`)
+    .all()
+    .map(mapBooking);
+}
+
+export function listBookingsForAgent(database: DatabaseSync, agentId: number): Booking[] {
+  return database
+    .prepare(`
+      ${bookingSelect}
+      WHERE bookings.agent_id = ?
+      ORDER BY bookings.appointment_time, bookings.id
+    `)
+    .all(agentId)
+    .map(mapBooking);
+}
+
+export function createBooking(
+  database: DatabaseSync,
+  agentId: number,
+  therapyId: number,
+  appointmentTime: string,
+): number {
+  return lastInsertedId(
+    database
+      .prepare(`
+        INSERT INTO bookings (agent_id, therapy_id, appointment_time)
+        VALUES (?, ?, ?)
+      `)
+      .run(agentId, therapyId, appointmentTime).lastInsertRowid,
+  );
+}
+
+export function updateBookingStatus(
+  database: DatabaseSync,
+  bookingId: number,
+  status: BookingStatus,
+): void {
+  database.prepare('UPDATE bookings SET status = ? WHERE id = ?').run(status, bookingId);
+}
+
+export function listTherapiesForAgent(database: DatabaseSync, agentId: number): Therapy[] {
+  return database
+    .prepare(`
+      SELECT DISTINCT therapies.id, therapies.name, therapies.description
+      FROM therapies
+      INNER JOIN ailment_therapies ON ailment_therapies.therapy_id = therapies.id
+      INNER JOIN agent_ailments ON agent_ailments.ailment_id = ailment_therapies.ailment_id
+      WHERE agent_ailments.agent_id = ?
+      ORDER BY therapies.name COLLATE NOCASE, therapies.id
+    `)
+    .all(agentId)
+    .map(mapTherapy);
 }

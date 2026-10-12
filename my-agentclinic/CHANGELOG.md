@@ -1,6 +1,9 @@
 # Changelog
 
 ## 2026-10-12
+- Completed the MVP therapy catalog, ISO-8601 appointment booking and status workflow, and agent dashboard.
+- Added booking persistence, input validation, logged database errors, responsive navigation, end-to-end workflow tests, and empty/error states.
+- Marked Nano Phases 3–7 complete in the roadmap and recorded MVP acceptance criteria.
 - Completed Nano Phase 2 with ordered SQLite migrations, idempotent starter agents and ailments, agent-ailment links, server-rendered clinic workflows, and responsive JSX/CSS layout.
 - Implemented ordered SQLite migrations and seeded three fictional agents, starter ailments, and idempotent links from each agent to an ailment.
 - Updated Nano Phase 2 to require versioned SQLite migrations, a first agents-table migration, and idempotent fictional agent and ailment seed data with every seeded agent linked to at least one ailment.
